@@ -1,0 +1,24 @@
+make a shortcode and put where you want to add --- its make select option menu for category list
+
+<select name="category_list" onChange="document.location.href=this.options[this.selectedIndex].value;> 
+ <option value="">Please Select</option> 
+ <?php 
+    $values = array(
+     'taxonomy' => 'newsletter_cat'
+      'echo' => 1,
+      'selected' => get_query_var( 'cat' ),
+      'name' => 'cat',
+      'id' => '',
+      
+     );
+  $categories = get_categories($values); 
+  foreach ($categories as $category) {
+  $term_link = get_category_link($category->term_id );
+                        $term_link = esc_url( $term_link );
+    $option = '<option value="'.$term_link.'">';
+    $option .= $category->cat_name;
+    $option .= '</option>';
+    echo $option;
+  }
+ ?>
+</select>
