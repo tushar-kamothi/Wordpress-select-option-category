@@ -1,5 +1,7 @@
 make a shortcode and put where you want to add --- its make select option menu for category list
 
+https://www.mensshedswa.org.au/newsletter/
+
 <select name="category_list" onChange="document.location.href=this.options[this.selectedIndex].value;> 
  <option value="">Please Select</option> 
  <?php 
@@ -22,3 +24,37 @@ make a shortcode and put where you want to add --- its make select option menu f
   }
  ?>
 </select>
+
+
+/////Category with date option custom code
+
+function newsletter_category_date_menu(){
+                 
+        global $wpdb, $wp_locale;
+       $current_tax_id =  get_queried_object()->term_id;
+
+       $current_url = get_term_link( $current_tax_id );
+       //echo $current_url;
+          $finalurl = substr($current_url,46);
+      ?>
+    <select id="cat-dis-load"  name="cat-vise" onChange="document.location.href=this.options[this.selectedIndex].value;"> 
+                       <option value="<?php echo get_post_type_archive_link( 'newsletter' ); ?>"><?php echo esc_attr_e( 'Select Month', 'textdomain' ); ?></option> <?php
+                    $query = "select YEAR(post_date) AS `year`, MONTH(post_date) AS `month`, count(ID) as posts from $wpdb->posts,  $wpdb->term_taxonomy, $wpdb->term_relationships 
+                        WHERE $wpdb->posts.post_status = 'publish' 
+                        AND $wpdb->posts.post_type = 'newsletter'
+                        AND $wpdb->term_taxonomy.term_id = $current_tax_id                        
+                        AND $wpdb->posts.ID = $wpdb->term_relationships.object_id
+                        AND $wpdb->term_taxonomy.term_taxonomy_id = $wpdb->term_relationships.term_taxonomy_id
+                     GROUP BY YEAR(post_date), MONTH(post_date) ORDER BY post_date DESC"; 
+                     $arcresults = $wpdb->get_results($query); 
+                    
+                    foreach ($arcresults as $arcresult): 
+                    $text = sprintf(__('%1$s %2$d'), $wp_locale->get_month($arcresult->month), $arcresult->year);?>
+                    
+                 <option data-id="<?php echo $current_tax_id; ?>" value="<?php bloginfo('url') ?>/<?php echo $arcresult->year; ?>/<?php echo str_pad($arcresult->month, 2, '0', STR_PAD_LEFT); ?>/?newsletter_cat=<?php echo $finalurl; ?>"><?php echo $text; echo '('.$arcresult->posts.')';  ?></option>                    
+                      <?php endforeach; 
+               ?>
+    </select><?php
+}
+
+add_shortcode('my_search_shortcode', 'get_search_form');
